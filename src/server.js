@@ -1,4 +1,7 @@
 const { GraphQLServer } = require('graphql-yoga')
+const db = require('../db/models');
+
+require('dotenv').config();
 
 const typeDefs = `
 type Query {
@@ -17,4 +20,15 @@ const server = new GraphQLServer({
   resolvers,
 })
 
-server.start(() => console.log(`Server is running on http://localhost:4000`))
+db.sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });
+
+server.start({ port: process.env.PORT }, ({ port }) => {
+  console.log(`Server started, listening on port ${port} for incoming requests.`);
+});
