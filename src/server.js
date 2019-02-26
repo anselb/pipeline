@@ -3,21 +3,20 @@ const db = require('../db/models');
 
 require('dotenv').config();
 
-const typeDefs = `
-type Query {
-  info: String!
-}
-`
+const Query = require('./resolvers/Query')
+const Mutation = require('./resolvers/Mutation')
 
 const resolvers = {
-  Query: {
-    info: () => `Hello World`
-  }
+  Query,
+  Mutation,
 }
 
 const server = new GraphQLServer({
-  typeDefs,
+  typeDefs: './src/schema.graphql',
   resolvers,
+  context: request => {
+    return request
+  },
 })
 
 db.sequelize
