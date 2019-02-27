@@ -22,7 +22,6 @@ async function signup(parent, args, context, info) {
         expiresIn: "60 days"
       })
 
-      console.log(user)
       return user.get({ plain: true })
     })
     .catch((err) => {
@@ -32,6 +31,48 @@ async function signup(parent, args, context, info) {
   return {
     token,
     user,
+  }
+}
+
+async function login(parent, args, context, info) {
+  const username = args.username
+  const password = args.password
+
+  let user
+  let token
+
+  const canReturn = await db.User
+    .findOne({ where: { username } })
+    .then((foundUser) => {
+      // User not found
+      if (!foundUser) {
+        throw new Error('Wrong username or password')
+      }
+
+      // Set user and create token
+      user = foundUser
+      token = jwt.sign({ userId: user.id }, process.env.SECRET)
+
+      // Check the password
+      return bcrypt.compare(password, user.password)
+    })
+    .then((passwordMatch) => {
+      // Password does not match
+      if (!passwordMatch) {
+        throw new Error('Wrong username or password')
+      }
+
+      return true
+    })
+    .catch((err) => {
+      throw new Error(`Error: ${err}`)
+    })
+
+  if (canReturn) {
+    return {
+      token,
+      user,
+    }
   }
 }
 
@@ -101,4 +142,5 @@ module.exports = {
   postJob,
   updateJob,
   deleteJob,
+  login,
 }
