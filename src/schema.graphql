@@ -4,6 +4,8 @@ type Query {
 }
 
 type Mutation {
+  signup(username: String!, password: String!, email: String!, firstName: String!, lastName: String!): AuthPayload!
+
   postJob(companyName: String!, title: String!, description: String!, status: String!, location: String!, url: String!): Job!
   updateJob(id: ID!, companyName: String, title: String, description: String, status: String, location: String, url: String): Job
   deleteJob(id: ID!): Boolean
@@ -28,7 +30,10 @@ type Job {
 
 type User {
   id: ID!
-  name: String!
+  username: String!
+  password: String!
+  firstName: String!
+  lastName: String!
   email: String!
   jobs: [Job!]!
 }

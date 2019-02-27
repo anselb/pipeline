@@ -1,4 +1,39 @@
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const db = require('../../db/models')
+
+async function signup(parent, args, context, info) {
+  const password = await bcrypt.hash(args.password, 10)
+  const username = args.username
+
+  let token
+  const user = await db.User
+    .create({
+      username: username,
+      password: password,
+      email: args.email,
+      firstName: args.firstName,
+      lastName: args.lastName
+    }).then(() => db.User.findOrCreate({
+      where: { username }
+    })).spread((user, created) => {
+      // Create a new jwt token
+      token = jwt.sign({ userId: user.id }, process.env.SECRET, {
+        expiresIn: "60 days"
+      })
+
+      console.log(user)
+      return user.get({ plain: true })
+    })
+    .catch((err) => {
+      throw new Error(`Error: ${err}`)
+    })
+
+  return {
+    token,
+    user,
+  }
+}
 
 async function postJob (parent, args, context, info) {
   // const userId = getUserId(context)
@@ -62,6 +97,7 @@ async function deleteJob (parent, args, context, info) {
 
 
 module.exports = {
+  signup,
   postJob,
   updateJob,
   deleteJob,
