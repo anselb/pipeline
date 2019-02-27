@@ -30,6 +30,7 @@ type Job {
   status: String!
   location: String
   url: String
+  userId: ID
 }
 
 type User {

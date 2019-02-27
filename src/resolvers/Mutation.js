@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const db = require('../../db/models')
+const { getUserId } = require('../utils')
 
 async function signup(parent, args, context, info) {
   const password = await bcrypt.hash(args.password, 10)
@@ -77,7 +78,7 @@ async function login(parent, args, context, info) {
 }
 
 async function postJob (parent, args, context, info) {
-  // const userId = getUserId(context)
+  const userId = getUserId(context)
 
   return db.Job
     .create({
@@ -87,6 +88,7 @@ async function postJob (parent, args, context, info) {
       status: args.status,
       location: args.location,
       url: args.url,
+      userId: userId,
     })
     .then((job) => {
       console.log("New Job: ", job)
@@ -99,7 +101,7 @@ async function postJob (parent, args, context, info) {
 }
 
 async function updateJob (parent, args, context, info) {
-  // const userId = getUserId(context)
+  const userId = getUserId(context)
 
   return db.Job
     .update(args, {
@@ -118,7 +120,7 @@ async function updateJob (parent, args, context, info) {
 }
 
 async function deleteJob (parent, args, context, info) {
-  // const userId = getUserId(context)
+  const userId = getUserId(context)
 
   return db.Job
     .destroy({

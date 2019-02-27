@@ -1,10 +1,13 @@
 const db = require('../../db/models')
+const { getUserId } = require('../utils')
 
 async function jobs (parent, args, context, info) {
-  // const userId = getUserId(context)
+  const userId = getUserId(context)
 
   return db.Job
-    .findAll()
+    .findAll({
+      where: { userId: userId }
+    })
     .then((jobs) => {
       console.log("Got Jobs: ", jobs[0])
       return jobs
@@ -15,11 +18,11 @@ async function jobs (parent, args, context, info) {
 }
 
 async function job (parent, args, context, info) {
-  // const userId = getUserId(context)
+  const userId = getUserId(context)
 
   return db.Job
     .findOne({
-      where: { id: args.id }
+      where: { id: args.id, userId: userId }
     })
     .then((job) => {
       console.log("Got Job: ", job)
