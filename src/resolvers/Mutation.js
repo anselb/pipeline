@@ -4,19 +4,18 @@ const db = require('../../db/models')
 const { getUserId } = require('../utils')
 
 async function signup(parent, args, context, info) {
+  const email = args.email
   const password = await bcrypt.hash(args.password, 10)
-  const username = args.username
 
   let token
   const user = await db.User
     .create({
-      username: username,
+      email: email,
       password: password,
-      email: args.email,
       firstName: args.firstName,
       lastName: args.lastName
     }).then(() => db.User.findOrCreate({
-      where: { username }
+      where: { email }
     })).spread((user, created) => {
       // Create a new jwt token
       token = jwt.sign({ userId: user.id }, process.env.SECRET, {
@@ -36,18 +35,18 @@ async function signup(parent, args, context, info) {
 }
 
 async function login(parent, args, context, info) {
-  const username = args.username
+  const email = args.email
   const password = args.password
 
   let user
   let token
 
   const canReturn = await db.User
-    .findOne({ where: { username } })
+    .findOne({ where: { email } })
     .then((foundUser) => {
       // User not found
       if (!foundUser) {
-        throw new Error('Wrong username or password')
+        throw new Error('Wrong email or password')
       }
 
       // Set user and create token
@@ -60,7 +59,7 @@ async function login(parent, args, context, info) {
     .then((passwordMatch) => {
       // Password does not match
       if (!passwordMatch) {
-        throw new Error('Wrong username or password')
+        throw new Error('Wrong email or password')
       }
 
       return true
